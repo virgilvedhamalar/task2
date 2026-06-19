@@ -1,163 +1,125 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Authentication System</title>
-
     <style>
-        body{
+        body {
             font-family: Arial, sans-serif;
-            background:#f4f4f4;
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            min-height:100vh;
+            background: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            margin-top: 50px;
         }
 
-        .container{
-            background:white;
-            padding:30px;
-            border-radius:10px;
-            width:350px;
-            box-shadow:0 0 10px rgba(0,0,0,0.2);
+        .container {
+            background: white;
+            padding: 20px;
+            width: 350px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px gray;
         }
 
-        h2{
-            text-align:center;
+        h2 {
+            text-align: center;
         }
 
-        input{
-            width:100%;
-            padding:10px;
-            margin:8px 0;
-            box-sizing:border-box;
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
         }
 
-        button{
-            width:100%;
-            padding:10px;
-            margin-top:10px;
-            border:none;
-            background:#007bff;
-            color:white;
-            cursor:pointer;
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
         }
 
-        button:hover{
-            background:#0056b3;
+        button:hover {
+            background: #0056b3;
         }
 
-        #message{
-            margin-top:15px;
-            text-align:center;
-            font-weight:bold;
+        #message {
+            margin-top: 10px;
+            text-align: center;
+            color: green;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <h2>Register</h2>
 
-    <h2>User Authentication</h2>
+    <input type="text" id="regName" placeholder="Enter Name">
+    <input type="email" id="regEmail" placeholder="Enter Email">
+    <input type="password" id="regPassword" placeholder="Enter Password">
 
-    <input type="text" id="name" placeholder="Name">
+    <button onclick="register()">Register</button>
 
-    <input type="email" id="email" placeholder="Email">
+    <hr>
 
-    <input type="password" id="password" placeholder="Password">
+    <h2>Login</h2>
 
-    <button onclick="registerUser()">Register</button>
+    <input type="email" id="loginEmail" placeholder="Enter Email">
+    <input type="password" id="loginPassword" placeholder="Enter Password">
 
-    <button onclick="loginUser()">Login</button>
+    <button onclick="login()">Login</button>
 
-    <button onclick="getProfile()">View Profile</button>
+    <hr>
 
-    <button onclick="logoutUser()">Logout</button>
+    <button onclick="logout()">Logout</button>
 
     <p id="message"></p>
-
 </div>
 
 <script>
+function register() {
+    const name = document.getElementById("regName").value;
+    const email = document.getElementById("regEmail").value;
+    const password = document.getElementById("regPassword").value;
 
-const API_URL = "http://localhost:5000/api";
+    const user = {
+        name,
+        email,
+        password
+    };
 
-async function registerUser(){
+    localStorage.setItem(email, JSON.stringify(user));
 
-    const name = document.getElementById("name").value;
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-
-    const response = await fetch(`${API_URL}/register`,{
-        method:"POST",
-        headers:{
-            "Content-Type":"application/json"
-        },
-        body:JSON.stringify({
-            name,
-            email,
-            password
-        })
-    });
-
-    const data = await response.json();
-
-    document.getElementById("message").innerText = data.message;
+    document.getElementById("message").innerText =
+        "Registration Successful!";
 }
 
-async function loginUser(){
+function login() {
+    const email = document.getElementById("loginEmail").value;
+    const password = document.getElementById("loginPassword").value;
 
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+    const storedUser = JSON.parse(localStorage.getItem(email));
 
-    const response = await fetch(`${API_URL}/login`,{
-        method:"POST",
-        headers:{
-            "Content-Type":"application/json"
-        },
-        body:JSON.stringify({
-            email,
-            password
-        })
-    });
+    if (storedUser && storedUser.password === password) {
+        localStorage.setItem("loggedInUser", email);
 
-    const data = await response.json();
-
-    if(data.token){
-        localStorage.setItem("token",data.token);
+        document.getElementById("message").innerText =
+            "Login Successful!";
+    } else {
+        document.getElementById("message").innerText =
+            "Invalid Email or Password!";
     }
-
-    document.getElementById("message").innerText =
-    data.message || "Login Successful";
 }
 
-async function getProfile(){
-
-    const token = localStorage.getItem("token");
-
-    const response = await fetch(`${API_URL}/profile`,{
-        method:"GET",
-        headers:{
-            "Authorization":"Bearer " + token
-        }
-    });
-
-    const data = await response.json();
+function logout() {
+    localStorage.removeItem("loggedInUser");
 
     document.getElementById("message").innerText =
-    JSON.stringify(data);
+        "Logged Out Successfully!";
 }
-
-function logoutUser(){
-
-    localStorage.removeItem("token");
-
-    document.getElementById("message").innerText =
-    "Logout Successful";
-}
-
 </script>
 
 </body>
 </html>
+
